@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String           @id @default(uuid())
+  email          String           @unique
+  username       String?
+  avatarUrl      String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  participations Participation[]
+}
+
+model Drop {
+  id             String           @id @default(uuid())
+  title          String
+  description    String?
+  type           DropType         // 'AUCTION' or 'FCFS' or 'RANDOM'
+  imageUrl       String?
+  price          Float?           // Used for FCFS
+  supply         Int              // Max number of participants allowed
+  startTime      DateTime
+  endTime        DateTime
+  status         DropStatus       @default(PENDING)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  participations Participation[]
+}
+
+enum DropType {
+  AUCTION
+  FCFS
+  RANDOM
+}
+
+enum DropStatus {
+  PENDING
+  LIVE
+  ENDED
+  CANCELLED
+}
+
+model Participation {
+  id          String   @id @default(uuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  drop        Drop     @relation(fields: [dropId], references: [id])
+  dropId      String
+  joinedAt    DateTime @default(now())
+  queueIndex  Int      // Index in queue (for FCFS)
+  bid         Bid?     @relation("ParticipationBid") // Named relation
+
+  @@unique([userId, dropId]) // One user can only participate once per drop
+}
+
+model Bid {
+  id              String         @id @default(uuid())
+  amount          Float          // USDC
+  placedAt        DateTime       @default(now())
+  participation   Participation  @relation("ParticipationBid", fields: [participationId], references: [id])
+  participationId String         @unique
+}
