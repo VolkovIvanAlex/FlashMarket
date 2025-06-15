@@ -9,28 +9,138 @@ import Image from "next/image"
 
 const auctionDrops = [
   {
-    id: 1,
-    title: "Legendary Sneaker Auction",
+    id: "1",
+    title: "Exclusive Art Auction",
     status: "live",
     image: "/placeholder.svg?height=200&width=200",
-    currentBid: 250,
-    startingBid: 100,
-    timeLeft: "2h 15m",
-    bidders: 12,
-    totalBids: 28,
-    description: "Limited edition sneakers from top brand",
+    currentBid: 0,
+    startingBid: 0,
+    timeLeft: "24h 0m",
+    bidders: 3,
+    totalBids: 3,
+    description: "Bid on a rare digital art piece.",
+    participants: [
+      {
+        id: "participation-001",
+        user: {
+          id: "user-bidder-001",
+          email: "bidder1@example.com",
+          username: "bidderOne",
+          avatarUrl: "https://example.com/avatars/bidder1.png",
+        },
+        queueIndex: 1,
+        joinedAt: "2025-06-13T10:01:00.000Z",
+      },
+      {
+        id: "participation-002",
+        user: {
+          id: "user-bidder-002",
+          email: "bidder2@example.com",
+          username: "bidderTwo",
+          avatarUrl: "https://example.com/avatars/bidder2.png",
+        },
+        queueIndex: 2,
+        joinedAt: "2025-06-13T10:03:00.000Z",
+      },
+      {
+        id: "participation-003",
+        user: {
+          id: "user-bidder-003",
+          email: "bidder3@example.com",
+          username: "bidderThree",
+          avatarUrl: "https://example.com/avatars/bidder3.png",
+        },
+        queueIndex: 3,
+        joinedAt: "2025-06-13T10:04:00.000Z",
+      },
+    ],
   },
+
+  // New drop 1
   {
-    id: 4,
-    title: "Vintage Watch Auction",
+    id: "4",
+    title: "Rare Sneaker Auction",
+    status: "live",
+    image: "/placeholder.svg?height=200&width=200",
+    currentBid: 220,
+    startingBid: 150,
+    timeLeft: "12h 45m",
+    bidders: 2,
+    totalBids: 5,
+    description: "Limited edition sneakers from a top designer.",
+    participants: [
+      {
+        id: "participation-004",
+        user: {
+          id: "user-bidder-004",
+          email: "kickslover@example.com",
+          username: "kicksFan",
+          avatarUrl: "https://example.com/avatars/kickslover.png",
+        },
+        queueIndex: 1,
+        joinedAt: "2025-06-13T09:00:00.000Z",
+      },
+      {
+        id: "participation-005",
+        user: {
+          id: "user-bidder-005",
+          email: "sneakerhead@example.com",
+          username: "sneakerPro",
+          avatarUrl: "https://example.com/avatars/sneakerhead.png",
+        },
+        queueIndex: 2,
+        joinedAt: "2025-06-13T09:05:00.000Z",
+      },
+    ],
+  },
+
+  // New drop 2
+  {
+    id: "10",
+    title: "Luxury Watch Auction",
     status: "upcoming",
     image: "/placeholder.svg?height=200&width=200",
     currentBid: 0,
-    startingBid: 500,
-    timeLeft: "1d 4h",
+    startingBid: 1200,
+    timeLeft: "2d 3h",
     bidders: 0,
     totalBids: 0,
-    description: "Rare vintage timepiece from 1960s",
+    description: "Auction for a classic Swiss luxury watch.",
+    participants: [
+      {
+        id: "participation-006",
+        user: {
+          id: "user-bidder-006",
+          email: "watchlover@example.com",
+          username: "chronoKing",
+          avatarUrl: "https://example.com/avatars/watchlover.png",
+        },
+        queueIndex: 1,
+        joinedAt: "2025-06-13T08:30:00.000Z",
+      },
+      {
+        id: "participation-007",
+        user: {
+          id: "user-bidder-007",
+          email: "collector@example.com",
+          username: "luxCollect",
+          avatarUrl: "https://example.com/avatars/collector.png",
+        },
+        queueIndex: 2,
+        joinedAt: "2025-06-13T08:35:00.000Z",
+      },
+      {
+        id: "participation-008",
+        user: {
+          id: "user-bidder-008",
+          email: "timefan@example.com",
+          username: "tickTock",
+          avatarUrl: "https://example.com/avatars/timefan.png",
+        },
+        queueIndex: 3,
+        joinedAt: "2025-06-13T08:36:30.000Z",
+      },
+    ],
   },
 ]
 

@@ -12,6 +12,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Plus, User, LogOut } from "lucide-react"
+import { useWallet } from '@/hooks/useWallet'
+import { useClearNode } from '@/hooks/useClearNode'
+import { useEffect } from 'react'
+import { Hex } from "viem"
 
 interface TopNavbarProps {
   onSignOut: () => void
@@ -19,6 +23,16 @@ interface TopNavbarProps {
 
 export function TopNavbar({ onSignOut }: TopNavbarProps) {
   const router = useRouter()
+  const { isConnected, connectWallet, walletClient } = useWallet()
+  const { connect } = useClearNode()
+
+  useEffect(() => {
+    if (walletClient) {
+      connect(walletClient)
+    }
+  }, [walletClient, connect])
+
+  const shortenedAddress = walletClient ? `${walletClient.account?.address.slice(0, 6)}...${walletClient.account?.address.slice(-4)}` : ''
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b bg-white px-6">
@@ -27,6 +41,13 @@ export function TopNavbar({ onSignOut }: TopNavbarProps) {
       </div>
 
       <div className="flex items-center gap-4">
+        {isConnected ? (
+          <Button variant="outline" disabled>
+            {shortenedAddress}
+          </Button>
+        ) : (
+          <Button onClick={connectWallet}>Connect Wallet</Button>
+        )}
         <Button onClick={() => router.push("/create-drop")} className="bg-blue-600 hover:bg-blue-700">
           <Plus className="w-4 h-4 mr-2" />
           Create New Drop

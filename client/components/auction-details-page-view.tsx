@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -8,34 +8,136 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, Clock, Users, Gavel, Heart, Share2, TrendingUp } from "lucide-react"
+import { ArrowLeft, Clock, Users, Gavel, Heart, Share2, TrendingUp, X } from "lucide-react"
 import Image from "next/image"
+import { useWallet } from "@/hooks/useWallet"
+import { useClearNode } from "@/hooks/useClearNode"
 
 // Mock data - replace with API call
-const mockAuctions = [
+const auctionDrops = [
   {
     id: 1,
-    title: "Legendary Sneaker Auction",
+    title: "Exclusive Art Auction",
     status: "live",
-    image: "/placeholder.svg?height=400&width=400",
-    currentBid: 250,
-    startingBid: 100,
-    timeLeft: "2h 15m",
-    bidders: 12,
-    totalBids: 28,
-    description: "Limited edition sneakers from top brand with certificate of authenticity",
+    image: "/placeholder.svg?height=200&width=200",
+    currentBid: 0,
+    startingBid: 0,
+    timeLeft: "24h 0m",
+    bidders: 3,
+    totalBids: 3,
+    description: "Bid on a rare digital art piece.",
+    participants: [
+      // {
+      //   id: "participation-001",
+      //   user: {
+      //     id: "user-bidder-001",
+      //     email: "bidder1@example.com",
+      //     username: "bidderOne",
+      //     avatarUrl: "https://example.com/avatars/bidder1.png",
+      //     publicKey: process.env.NEXT_PUBLIC_SESSION_KEY_PUBLIC_KEY,
+      //     allocation: "0.0001",
+      //   },
+      //   queueIndex: 1,
+      //   joinedAt: "2025-06-13T10:01:00.000Z",
+      // },
+      {
+        id: "participation-002",
+        user: {
+          id: "user-bidder-002",
+          email: "bidder2@example.com",
+          username: "bidderTwo",
+          avatarUrl: "https://example.com/avatars/bidder2.png",
+          publicKey: process.env.NEXT_PUBLIC_WALLET_2_PUBLIC_KEY,
+          allocation: "0.0002",
+        },
+        queueIndex: 2,
+        joinedAt: "2025-06-13T10:03:00.000Z",
+      },
+    ],
   },
+
+  // New drop 1
   {
     id: 4,
-    title: "Vintage Watch Auction",
+    title: "Rare Sneaker Auction",
+    status: "live",
+    image: "/placeholder.svg?height=200&width=200",
+    currentBid: 220,
+    startingBid: 150,
+    timeLeft: "12h 45m",
+    bidders: 2,
+    totalBids: 5,
+    description: "Limited edition sneakers from a top designer.",
+    participants: [
+      // {
+      //   id: "participation-001",
+      //   user: {
+      //     id: "user-bidder-001",
+      //     email: "bidder1@example.com",
+      //     username: "bidderOne",
+      //     avatarUrl: "https://example.com/avatars/bidder1.png",
+      //     publicKey: process.env.NEXT_PUBLIC_SESSION_KEY_PUBLIC_KEY,
+      //     allocation: "0.0001",
+      //   },
+      //   queueIndex: 1,
+      //   joinedAt: "2025-06-13T10:01:00.000Z",
+      // },
+      {
+        id: "participation-002",
+        user: {
+          id: "user-bidder-002",
+          email: "bidder2@example.com",
+          username: "bidderTwo",
+          avatarUrl: "https://example.com/avatars/bidder2.png",
+          publicKey: process.env.NEXT_PUBLIC_WALLET_2_PUBLIC_KEY,
+          allocation: "0.0002",
+        },
+        queueIndex: 2,
+        joinedAt: "2025-06-13T10:03:00.000Z",
+      },
+    ],
+  },
+
+  // New drop 2
+  {
+    id: 10,
+    title: "Luxury Watch Auction",
     status: "upcoming",
-    image: "/placeholder.svg?height=400&width=400",
+    image: "/placeholder.svg?height=200&width=200",
     currentBid: 0,
-    startingBid: 500,
-    timeLeft: "1d 4h",
+    startingBid: 1200,
+    timeLeft: "2d 3h",
     bidders: 0,
     totalBids: 0,
-    description: "Rare vintage timepiece from 1960s in excellent condition",
+    description: "Auction for a classic Swiss luxury watch.",
+    participants: [
+      // {
+      //   id: "participation-001",
+      //   user: {
+      //     id: "user-bidder-001",
+      //     email: "bidder1@example.com",
+      //     username: "bidderOne",
+      //     avatarUrl: "https://example.com/avatars/bidder1.png",
+      //     publicKey: process.env.NEXT_PUBLIC_SESSION_KEY_PUBLIC_KEY,
+      //     allocation: "0.0001",
+      //   },
+      //   queueIndex: 1,
+      //   joinedAt: "2025-06-13T10:01:00.000Z",
+      // },
+      {
+        id: "participation-002",
+        user: {
+          id: "user-bidder-002",
+          email: "bidder2@example.com",
+          username: "bidderTwo",
+          avatarUrl: "https://example.com/avatars/bidder2.png",
+          publicKey: process.env.NEXT_PUBLIC_WALLET_2_PUBLIC_KEY,
+          allocation: "0.0002",
+        },
+        queueIndex: 2,
+        joinedAt: "2025-06-13T10:03:00.000Z",
+      },
+    ],
   },
 ]
 
@@ -47,9 +149,29 @@ export function AuctionDetailsPageView({ auctionId }: AuctionDetailsPageViewProp
   const router = useRouter()
   const [bidAmount, setBidAmount] = useState("")
   const [isPlacingBid, setIsPlacingBid] = useState(false)
+  const [isCreatingSession, setIsCreatingSession] = useState(false)
+  const [isClosingSession, setIsClosingSession] = useState(false)
+  const { isConnected, walletClient } = useWallet()
+  const { isAuthenticated, connect, createApplicationSession, closeApplicationSession, getLedgerBalances } = useClearNode()
 
   // Find the auction by ID (replace with API call)
-  const auction = mockAuctions.find((a) => a.id === Number.parseInt(auctionId))
+  const auction = auctionDrops.find((a) => a.id === Number.parseInt(auctionId))
+
+  useEffect(() => {
+    if (isAuthenticated && walletClient) {
+        getLedgerBalances(walletClient.account!.address);
+    }
+}, [isAuthenticated, !!walletClient]);
+
+  // Connect to ClearNode when wallet is connected
+  useEffect(() => {
+    if (isConnected && walletClient && !isAuthenticated) {
+      console.log("Connecting to ClearNode...");
+      connect(walletClient)
+        .then(() => console.log("ClearNode connection initiated"))
+        .catch((error) => console.error("Failed to connect to ClearNode:", error));
+    }
+  }, [isConnected, walletClient, isAuthenticated, connect]);
 
   if (!auction) {
     return (
@@ -90,16 +212,63 @@ export function AuctionDetailsPageView({ auctionId }: AuctionDetailsPageViewProp
     }, 1000)
   }
 
+  const handleCreateSession = async () => {
+    if (!walletClient) return
+
+    setIsCreatingSession(true)
+    try {
+      await createApplicationSession(walletClient.account!.address, auction)
+      alert("Session created successfully!")
+    } catch (error) {
+      console.error("Error creating session:", error)
+      alert("Failed to create session.")
+    } finally {
+      setIsCreatingSession(false)
+    }
+  }
+
+  const handleCloseSession = async () => {
+    if (!walletClient) return
+
+    setIsClosingSession(true)
+    try {
+      await closeApplicationSession(walletClient.account!.address, 0, auction)
+      alert("Session closed successfully!")
+    } catch (error) {
+      console.error("Error closing session:", error)
+      alert("Failed to close session.")
+    } finally {
+      setIsClosingSession(false)
+    }
+  }
+
   const canBid = auction.status === "live"
   const minimumBid = auction.currentBid > 0 ? auction.currentBid + 1 : auction.startingBid
+  console.log("isConnected = " , isConnected);
+  console.log("isAuthenticated = " , isAuthenticated);
+  console.log("walletClient = " , walletClient);
+  const canCreateSession = auction.status === "live" && isConnected && !!walletClient
+  const canCloseSession = canCreateSession && !!localStorage.getItem('app_session_id')
 
-  // Mock bid history
+  // Bid history with new entries
   const bidHistory = [
-    { user: "User123", amount: 250, time: "2 minutes ago" },
-    { user: "User456", amount: 240, time: "5 minutes ago" },
-    { user: "User789", amount: 230, time: "8 minutes ago" },
-    { user: "User321", amount: 220, time: "12 minutes ago" },
-    { user: "User654", amount: 210, time: "15 minutes ago" },
+    {
+      user: "0x5fdEf9476FDe30cDa6a84f9207D475748Ddfa7F9",
+      amount: "0.0001 USDC",
+      time: "10 minutes ago",
+    },
+    {
+      user: "0x0d2E193A5428ecD15Ea805cD75A3B851BfacDFab",
+      amount: "0.0002 USDC",
+      time: "15 minutes ago",
+    },
+    ...auction.currentBid > 0 ? [
+      { user: "User123", amount: "$250", time: "2 minutes ago" },
+      { user: "User456", amount: "$240", time: "5 minutes ago" },
+      { user: "User789", amount: "$230", time: "8 minutes ago" },
+      { user: "User321", amount: "$220", time: "12 minutes ago" },
+      { user: "User654", amount: "$210", time: "15 minutes ago" },
+    ] : [],
   ]
 
   return (
@@ -241,6 +410,21 @@ export function AuctionDetailsPageView({ auctionId }: AuctionDetailsPageViewProp
                     <Gavel className="w-4 h-4 mr-2" />
                     {isPlacingBid ? "Placing Bid..." : "Place Bid"}
                   </Button>
+                  <Button
+                    onClick={handleCreateSession}
+                    disabled={!canCreateSession || isCreatingSession}
+                    className="w-full bg-purple-600 hover:bg-purple-700"
+                  >
+                    {isCreatingSession ? "Creating Session..." : "Create Session"}
+                  </Button>
+                  <Button
+                    onClick={handleCloseSession}
+                    disabled={!canCloseSession || isClosingSession}
+                    className="w-full bg-red-600 hover:bg-red-700"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    {isClosingSession ? "Closing Session..." : "Close Session"}
+                  </Button>
                 </div>
               ) : (
                 <div className="text-center py-4">
@@ -258,14 +442,14 @@ export function AuctionDetailsPageView({ auctionId }: AuctionDetailsPageViewProp
             </CardHeader>
             <CardContent>
               <div className="space-y-3 max-h-64 overflow-y-auto">
-                {auction.currentBid > 0 ? (
+                {bidHistory.length > 0 ? (
                   bidHistory.map((bid, index) => (
                     <div key={index} className="flex justify-between items-center py-2 border-b last:border-b-0">
                       <div>
                         <p className="font-medium">{bid.user}</p>
                         <p className="text-sm text-gray-500">{bid.time}</p>
                       </div>
-                      <p className="font-bold text-green-600">${bid.amount}</p>
+                      <p className="font-bold text-green-600">{bid.amount}</p>
                     </div>
                   ))
                 ) : (
